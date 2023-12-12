@@ -4,7 +4,7 @@ FROM public.ecr.aws/amazonlinux/amazonlinux:2023 AS builder
 RUN mkdir -p /build && \
     yum update -y && \
     # Add required packages
-    yum install -y gcc tree zip openssh postgresql-devel openldap-devel-2.4.57-6.amzn2023.0.3 && \
+    yum install -y gcc tree zip openssh openssl postgresql-devel openldap-devel.x86_64 && \
     # Install rust with rustup
     curl -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal
 
@@ -14,7 +14,9 @@ ENV PATH=/root/.cargo/bin:/usr/sbin:/usr/bin:/sbin:/bin
 # Default build command
 COPY . .
 RUN cargo build --features postgresql --release
-RUN mv target/release/bootstrap bootstrap && \
+RUN ls -la target
+RUN ls -la target/release
+RUN mv target/release/vaultwarden bootstrap && \
   strip --strip-all bootstrap && \
   size bootstrap && \
   ldd  bootstrap && \
