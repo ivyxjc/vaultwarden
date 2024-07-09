@@ -39,6 +39,9 @@ use tokio::{
     io::{AsyncBufReadExt, BufReader},
 };
 
+use lambda_web::{is_running_on_lambda, launch_rocket_on_lambda};
+
+
 #[macro_use]
 mod error;
 mod api;
@@ -517,7 +520,11 @@ async fn launch_rocket(pool: db::DbPool, extra_debug: bool) -> Result<(), Error>
         CONFIG.shutdown();
     });
 
-    let _ = instance.launch().await?;
+    if is_running_on_lambda(){
+        let _ = launch_rocket_on_lambda(instance).await;
+    }else{
+        let _ = instance.launch().await?;
+    }
 
     info!("Vaultwarden process exited!");
     Ok(())
