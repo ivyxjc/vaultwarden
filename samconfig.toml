@@ -3,7 +3,7 @@ version = 0.1
 [default.deploy]
 [default.deploy.parameters]
 stack_name = "vaultwarden-app"
-s3_bucket = ""
+resolver_s3= true
 s3_prefix = "vaultwarden-app"
 region = "us-west-2"
 confirm_changeset = true

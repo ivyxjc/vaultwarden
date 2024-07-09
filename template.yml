@@ -36,6 +36,7 @@ Resources:
                 Variables:
                     DATABASE_URL: !Ref DatabaseUrl
                     DB_CONNECTION_RETRIES: 2
+                    DOMAIN_ORIGIN:
                     DATA_FOLDER: /tmp/data
                     I_REALLY_WANT_VOLATILE_STORAGE: true
                     WEB_VAULT_ENABLED: false
