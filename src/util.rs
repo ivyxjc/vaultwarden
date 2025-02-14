@@ -166,6 +166,7 @@ impl Fairing for Cors {
 
         if let Some(origin) = Cors::get_allowed_origin(req_headers) {
             response.set_header(Header::new("Access-Control-Allow-Origin", origin));
+            response.set_header(Header::new("Access-Control-Allow-Credentials", "true"));
         }
 
         // Preflight request

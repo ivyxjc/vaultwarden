@@ -1,0 +1,47 @@
+name: lambda-build
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: tag of image
+        type: string
+        required: true
+        default: :1.33.2
+jobs:
+  image-build:
+    runs-on: ubuntu-latest
+    env:
+      AWS_REGION: us-west-2
+      REPO_NAME: vaultwarden
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          audience: sts.amazonaws.com
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: ${{ secrets.ACTION_ASSUME_ROLE }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Docker meta
+        id: meta
+        uses: docker/metadata-action@v3
+        with:
+          images: ${{ secrets.REGISTRY }}/${{ env.REPO_NAME }}
+          flavor: |
+          tags: |
+            ${{ inputs.tag }}
+
+      - name: Docker build and push
+        id: docker_build
+        uses: docker/build-push-action@v2
+        with:
+          platforms: linux/amd64
+          file: ServerlessDockerfile
+          push: true
+          context: .
+          tags: ${{ steps.meta.outputs.tags }}

@@ -42,6 +42,7 @@ syslog = "7.0.0"
 
 [dependencies]
 macros = { path = "./macros" }
+lambda-web = { version = "0.2.1", features=["rocket05"] }
 
 # Logging
 log = "0.4.25"

@@ -45,6 +45,9 @@ use tokio::{
 #[cfg(unix)]
 use tokio::signal::unix::SignalKind;
 
+use lambda_web::{is_running_on_lambda, launch_rocket_on_lambda};
+
+
 #[macro_use]
 mod error;
 mod api;
@@ -615,7 +618,11 @@ async fn launch_rocket(pool: db::DbPool, extra_debug: bool) -> Result<(), Error>
         });
     }
 
-    instance.launch().await?;
+    if is_running_on_lambda(){
+        let _ = launch_rocket_on_lambda(instance).await;
+    }else{
+        let _ = instance.launch().await?;
+    }
 
     info!("Vaultwarden process exited!");
     Ok(())

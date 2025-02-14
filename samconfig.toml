@@ -1,0 +1,12 @@
+version = 0.1
+[default]
+[default.deploy]
+[default.deploy.parameters]
+stack_name = "vaultwarden-app"
+resolver_s3= true
+s3_prefix = "vaultwarden-app"
+region = "us-west-2"
+confirm_changeset = true
+capabilities = "CAPABILITY_IAM"
+parameter_overrides = "CustomDomain=\"\" CertificateArn=\"\" DatabaseUrl=\"\""
+image_repositories = []

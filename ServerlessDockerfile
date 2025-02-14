@@ -1,0 +1,44 @@
+FROM public.ecr.aws/amazonlinux/amazonlinux:2023 AS builder
+
+# Setup build environment
+RUN mkdir -p /build && \
+    yum update -y && \
+    # Add required packages
+    yum install -y gcc tree zip openssh openssl postgresql-devel openldap-devel.x86_64 && \
+    # Install rust with rustup
+    curl -sSf https://sh.rustup.rs | sh -s -- -y --profile minimal
+
+# Build environment setting
+WORKDIR /build
+ENV PATH=/root/.cargo/bin:/usr/sbin:/usr/bin:/sbin:/bin
+# Default build command
+COPY . .
+RUN cargo build --features postgresql --release
+RUN ls -la target
+RUN ls -la target/release
+RUN mv target/release/vaultwarden bootstrap && \
+  strip --strip-all bootstrap && \
+  size bootstrap && \
+  ldd  bootstrap && \
+  zip -9 -j deploy.zip bootstrap
+
+RUN openssl genrsa -out /id_rsa.pem 2048 && \
+    openssl rsa -in /id_rsa.pem -pubout > /id_rsa.pub.pem
+
+
+FROM public.ecr.aws/amazonlinux/amazonlinux:2023 AS runner
+COPY --from=builder /build/bootstrap /bootstrap
+COPY --from=builder /lib64/libpq.* /lib64/
+COPY --from=builder /lib64/libssl.* /lib64/
+COPY --from=builder /lib64/libldap*.* /lib64/
+COPY --from=builder /lib64/liblber*.* /lib64/
+COPY --from=builder /lib64/libsasl*.* /lib64/
+COPY --chmod=666 --from=builder /id_rsa.pem /rsa_key.pem
+COPY --chmod=666 --from=builder /id_rsa.pub.pem /rsa_key.pub.pem
+# COPY --from=builder2 /lib64/libcrypto.* /usr/lib/x86_64-linux-gnu/
+# COPY --from=builder2 /lib64/libldap.* /usr/lib/x86_64-linux-gnu/
+
+COPY ./entrypoint.sh ./entrypoint.sh
+RUN chmod +x ./entrypoint.sh
+
+ENTRYPOINT [ "sh", "./entrypoint.sh" ]
