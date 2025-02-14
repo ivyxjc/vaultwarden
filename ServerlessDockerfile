@@ -38,7 +38,7 @@ COPY --chmod=666 --from=builder /id_rsa.pub.pem /rsa_key.pub.pem
 # COPY --from=builder2 /lib64/libcrypto.* /usr/lib/x86_64-linux-gnu/
 # COPY --from=builder2 /lib64/libldap.* /usr/lib/x86_64-linux-gnu/
 
-COPY ./entrypoint.sh ./entrypoint.sh
-RUN chmod +x ./entrypoint.sh
+COPY entrypoint.sh entrypoint.sh
+RUN chmod +x entrypoint.sh
 
 ENTRYPOINT [ "sh", "./entrypoint.sh" ]
